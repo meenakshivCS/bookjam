@@ -1,15 +1,38 @@
+'use client';
+
+import { useState, useMemo } from 'react';
 import Link from 'next/link';
-import { ChevronRight, TrendingUp } from 'lucide-react';
+import { ChevronRight, TrendingUp, SlidersHorizontal } from 'lucide-react';
 import BookCard from '@/components/BookCard';
 import { getMockBestsellers } from '@/lib/mock-data';
 
-export const metadata = {
-  title: 'Best Sellers - BookJam',
-  description: 'Discover the most popular books at BookJam. Shop our bestseller collection with great discounts.',
-};
+type SortOption = 'popularity' | 'price-low' | 'price-high' | 'rating';
 
 export default function BestsellersPage() {
+  const [sortBy, setSortBy] = useState<SortOption>('popularity');
   const books = getMockBestsellers();
+
+  const sortedBooks = useMemo(() => {
+    const result = [...books];
+
+    switch (sortBy) {
+      case 'price-low':
+        result.sort((a, b) => a.price - b.price);
+        break;
+      case 'price-high':
+        result.sort((a, b) => b.price - a.price);
+        break;
+      case 'rating':
+        result.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+        break;
+      case 'popularity':
+      default:
+        result.sort((a, b) => (b.review_count || 0) - (a.review_count || 0));
+        break;
+    }
+
+    return result;
+  }, [books, sortBy]);
 
   return (
     <div className="min-h-screen bg-cream">
@@ -45,20 +68,31 @@ export default function BestsellersPage() {
 
       {/* Books Grid */}
       <div className="container mx-auto px-4 py-12">
-        <div className="flex items-center justify-between mb-8">
-          <p className="font-body text-secondary-600">
-            <span className="font-semibold text-charcoal">{books.length}</span> bestselling books
-          </p>
-          <select className="px-4 py-2 bg-white border border-secondary-200 rounded-lg font-body text-charcoal focus:border-primary-400 outline-none">
-            <option>Sort by: Popularity</option>
-            <option>Price: Low to High</option>
-            <option>Price: High to Low</option>
-            <option>Rating</option>
-          </select>
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8 p-4 bg-white rounded-xl shadow-sm">
+          <div className="flex items-center gap-2">
+            <SlidersHorizontal className="w-5 h-5 text-secondary-500" />
+            <p className="font-body text-secondary-600">
+              <span className="font-semibold text-charcoal">{sortedBooks.length}</span> bestselling books
+            </p>
+          </div>
+          
+          <div className="flex items-center gap-2">
+            <label className="font-body text-sm text-secondary-600">Sort by:</label>
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as SortOption)}
+              className="px-4 py-2 bg-secondary-50 border border-secondary-200 rounded-lg font-body text-charcoal focus:border-primary-400 outline-none cursor-pointer"
+            >
+              <option value="popularity">Popularity</option>
+              <option value="price-low">Price: Low to High</option>
+              <option value="price-high">Price: High to Low</option>
+              <option value="rating">Rating</option>
+            </select>
+          </div>
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 md:gap-6">
-          {books.map((book, index) => (
+          {sortedBooks.map((book, index) => (
             <BookCard key={book.uid} book={book} index={index} />
           ))}
         </div>
@@ -66,4 +100,3 @@ export default function BestsellersPage() {
     </div>
   );
 }
-
