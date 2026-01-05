@@ -4,14 +4,12 @@ import { ChevronRight } from 'lucide-react';
 import BookCard from '@/components/BookCard';
 import { mockCategories, getMockBooksByCategory, mockBooks } from '@/lib/mock-data';
 
+// Allow dynamic rendering for category pages
+export const dynamic = 'force-dynamic';
+export const dynamicParams = true;
+
 interface CategoryPageProps {
   params: { slug: string };
-}
-
-export async function generateStaticParams() {
-  return mockCategories.map((category) => ({
-    slug: category.slug,
-  }));
 }
 
 export async function generateMetadata({ params }: CategoryPageProps) {
