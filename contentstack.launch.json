@@ -1,0 +1,15 @@
+{
+  "name": "BookJam",
+  "framework": "nextjs",
+  "buildCommand": "npm run build",
+  "installCommand": "npm install",
+  "outputDirectory": ".next",
+  "nodeVersion": "18",
+  "environmentVariables": {
+    "NEXT_PUBLIC_CONTENTSTACK_API_KEY": "blta792e06fbd51e931",
+    "NEXT_PUBLIC_CONTENTSTACK_DELIVERY_TOKEN": "csadb74c050f0cd17662d5688f",
+    "NEXT_PUBLIC_CONTENTSTACK_ENVIRONMENT": "prod",
+    "NEXT_PUBLIC_CONTENTSTACK_REGION": "us"
+  }
+}
+
