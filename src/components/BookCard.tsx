@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import { Star, ShoppingBag, Heart } from 'lucide-react';
 import { Book, Author } from '@/lib/types';
 import { useCartStore } from '@/lib/cart-store';
+import { useWishlistStore } from '@/lib/wishlist-store';
 
 interface BookCardProps {
   book: Book;
@@ -15,7 +16,9 @@ interface BookCardProps {
 
 export default function BookCard({ book, variant = 'default', index = 0 }: BookCardProps) {
   const { addItem, openCart } = useCartStore();
+  const { toggleItem, isInWishlist } = useWishlistStore();
 
+  const inWishlist = isInWishlist(book.uid);
   const author = Array.isArray(book.author) ? book.author[0] : book.author;
   const authorName = (author as Author)?.name || 'Unknown Author';
 
@@ -24,6 +27,12 @@ export default function BookCard({ book, variant = 'default', index = 0 }: BookC
     e.stopPropagation();
     addItem(book);
     openCart();
+  };
+
+  const handleToggleWishlist = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    toggleItem(book);
   };
 
   const formatPrice = (price: number) => {
@@ -102,14 +111,14 @@ export default function BookCard({ book, variant = 'default', index = 0 }: BookC
 
             {/* Wishlist Button */}
             <button
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-              }}
-              className="absolute top-3 right-3 z-10 p-2 bg-white/90 hover:bg-white rounded-full 
-                       shadow-md opacity-0 group-hover:opacity-100 transition-all"
+              onClick={handleToggleWishlist}
+              className={`absolute top-3 right-3 z-10 p-2 rounded-full shadow-md transition-all
+                ${inWishlist 
+                  ? 'bg-red-500 text-white' 
+                  : 'bg-white/90 hover:bg-white text-secondary-400 hover:text-red-500 opacity-0 group-hover:opacity-100'
+                }`}
             >
-              <Heart className="w-5 h-5 text-secondary-400 hover:text-red-500" />
+              <Heart className={`w-5 h-5 ${inWishlist ? 'fill-current' : ''}`} />
             </button>
 
             {/* Cover Image */}
@@ -193,6 +202,18 @@ export default function BookCard({ book, variant = 'default', index = 0 }: BookC
             )}
           </div>
 
+          {/* Wishlist Button */}
+          <button
+            onClick={handleToggleWishlist}
+            className={`absolute top-2 right-2 z-10 p-1.5 rounded-full shadow transition-all
+              ${inWishlist 
+                ? 'bg-red-500 text-white opacity-100' 
+                : 'bg-white/90 hover:bg-white text-secondary-400 hover:text-red-500 opacity-0 group-hover:opacity-100'
+              }`}
+          >
+            <Heart className={`w-4 h-4 ${inWishlist ? 'fill-current' : ''}`} />
+          </button>
+
           {/* Cover Image */}
           <div className="relative aspect-[3/4] overflow-hidden bg-gradient-to-br from-secondary-100 to-secondary-200">
             <Image
@@ -247,4 +268,3 @@ export default function BookCard({ book, variant = 'default', index = 0 }: BookC
     </motion.div>
   );
 }
-
