@@ -1,17 +1,15 @@
 import Link from 'next/link';
 import { ChevronRight, Sparkles } from 'lucide-react';
 import BookCard from '@/components/BookCard';
-import { getNewArrivals } from '@/lib/contentstack-data';
-
-export const dynamic = 'force-dynamic';
+import { getMockNewArrivals } from '@/lib/mock-data';
 
 export const metadata = {
   title: 'New Arrivals - BookJam',
   description: 'Discover the latest books at BookJam. Shop our new arrivals collection with great discounts.',
 };
 
-export default async function NewArrivalsPage() {
-  const books = await getNewArrivals();
+export default function NewArrivalsPage() {
+  const books = getMockNewArrivals();
 
   return (
     <div className="min-h-screen bg-cream">

@@ -4,17 +4,17 @@ import BookCarousel from '@/components/BookCarousel';
 import FeaturesBar from '@/components/FeaturesBar';
 import PromoSection from '@/components/PromoSection';
 import {
-  getBestsellers,
-  getNewArrivals,
-  getFeaturedBooks,
-  getKidsBooks,
-} from '@/lib/contentstack-data';
+  getMockBestsellers,
+  getMockNewArrivals,
+  getMockFeaturedBooks,
+  getMockKidsBooks,
+} from '@/lib/mock-data';
 
-export default async function Home() {
-  const bestsellers = await getBestsellers();
-  const newArrivals = await getNewArrivals();
-  const featuredBooks = await getFeaturedBooks();
-  const kidsBooks = await getKidsBooks();
+export default function Home() {
+  const bestsellers = getMockBestsellers();
+  const newArrivals = getMockNewArrivals();
+  const featuredBooks = getMockFeaturedBooks();
+  const kidsBooks = getMockKidsBooks();
 
   return (
     <>
@@ -70,4 +70,3 @@ export default async function Home() {
     </>
   );
 }
-
