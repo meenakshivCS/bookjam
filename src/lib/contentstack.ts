@@ -31,7 +31,8 @@ export async function getEntries<T>(
   }
 ): Promise<T[]> {
   try {
-    let query = Stack.ContentType(contentTypeUid).Query();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let query: any = Stack.ContentType(contentTypeUid).Query();
 
     if (options?.limit) {
       query = query.limit(options.limit);
@@ -40,7 +41,7 @@ export async function getEntries<T>(
       query = query.skip(options.skip);
     }
     if (options?.includeReference) {
-      options.includeReference.forEach((ref) => {
+      options.includeReference.forEach((ref: string) => {
         query = query.includeReference(ref);
       });
     }
@@ -70,10 +71,11 @@ export async function getEntryByUid<T>(
   includeReference?: string[]
 ): Promise<T | null> {
   try {
-    let query = Stack.ContentType(contentTypeUid).Entry(entryUid);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let query: any = Stack.ContentType(contentTypeUid).Entry(entryUid);
 
     if (includeReference) {
-      includeReference.forEach((ref) => {
+      includeReference.forEach((ref: string) => {
         query = query.includeReference(ref);
       });
     }
@@ -93,10 +95,11 @@ export async function getEntryBySlug<T>(
   includeReference?: string[]
 ): Promise<T | null> {
   try {
-    let query = Stack.ContentType(contentTypeUid).Query().where('url', `/${slug}`);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let query: any = Stack.ContentType(contentTypeUid).Query().where('url', `/${slug}`);
 
     if (includeReference) {
-      includeReference.forEach((ref) => {
+      includeReference.forEach((ref: string) => {
         query = query.includeReference(ref);
       });
     }
@@ -115,7 +118,8 @@ export async function searchBooks<T>(
   options?: { limit?: number; category?: string }
 ): Promise<T[]> {
   try {
-    let query = Stack.ContentType(CONTENT_TYPES.BOOK)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let query: any = Stack.ContentType(CONTENT_TYPES.BOOK)
       .Query()
       .regex('title', searchTerm, 'i');
 
@@ -135,4 +139,3 @@ export async function searchBooks<T>(
 }
 
 export default Stack;
-
