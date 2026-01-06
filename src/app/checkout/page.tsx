@@ -16,12 +16,14 @@ import {
   Check,
 } from 'lucide-react';
 import { useCartStore } from '@/lib/cart-store';
+import { useCurrencyStore } from '@/lib/currency-store';
 import { Author } from '@/lib/types';
 
 type PaymentMethod = 'card' | 'upi' | 'netbanking' | 'wallet';
 
 export default function CheckoutPage() {
   const { items, getTotalPrice, clearCart } = useCartStore();
+  const { formatPrice, regionVariant, currency } = useCurrencyStore();
   const [step, setStep] = useState<'details' | 'payment' | 'success'>('details');
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>('card');
   const [isProcessing, setIsProcessing] = useState(false);
@@ -38,16 +40,10 @@ export default function CheckoutPage() {
   });
 
   const totalPrice = getTotalPrice();
-  const shippingFee = totalPrice >= 500 ? 0 : 50;
+  // Calculate free shipping threshold based on region
+  const thresholdInINR = regionVariant.freeShippingThreshold / currency.exchangeRate;
+  const shippingFee = totalPrice >= thresholdInINR ? 0 : 50;
   const finalTotal = totalPrice + shippingFee;
-
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('en-IN', {
-      style: 'currency',
-      currency: 'INR',
-      minimumFractionDigits: 0,
-    }).format(price);
-  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -515,7 +511,7 @@ export default function CheckoutPage() {
                   <span className="font-body text-sm font-medium">
                     {shippingFee === 0
                       ? 'You qualify for free shipping!'
-                      : `Add ${formatPrice(500 - totalPrice)} more for free shipping`}
+                      : `Add ${formatPrice(thresholdInINR - totalPrice)} more for free shipping`}
                   </span>
                 </div>
               </div>

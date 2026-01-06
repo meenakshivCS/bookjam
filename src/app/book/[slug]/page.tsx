@@ -18,6 +18,8 @@ import {
 } from 'lucide-react';
 import { getMockBookBySlug, mockBooks } from '@/lib/mock-data';
 import { useCartStore } from '@/lib/cart-store';
+import { useWishlistStore } from '@/lib/wishlist-store';
+import { useCurrencyStore } from '@/lib/currency-store';
 import BookCard from '@/components/BookCard';
 import { Author, Category } from '@/lib/types';
 
@@ -29,6 +31,8 @@ export default function BookPage({ params }: BookPageProps) {
   const [quantity, setQuantity] = useState(1);
   const [activeTab, setActiveTab] = useState<'description' | 'details' | 'reviews'>('description');
   const { addItem, openCart } = useCartStore();
+  const { toggleItem, isInWishlist } = useWishlistStore();
+  const { formatPrice, regionVariant } = useCurrencyStore();
 
   const book = getMockBookBySlug(params.slug);
 
@@ -50,14 +54,7 @@ export default function BookPage({ params }: BookPageProps) {
   const category = Array.isArray(book.category) ? book.category[0] : book.category;
   const categoryName = (category as Category)?.name || 'General';
   const categorySlug = (category as Category)?.slug || 'general';
-
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('en-IN', {
-      style: 'currency',
-      currency: 'INR',
-      minimumFractionDigits: 0,
-    }).format(price);
-  };
+  const inWishlist = isInWishlist(book.uid);
 
   const handleAddToCart = () => {
     for (let i = 0; i < quantity; i++) {
@@ -248,11 +245,16 @@ export default function BookPage({ params }: BookPageProps) {
 
             {/* Secondary Actions */}
             <div className="flex gap-4 mb-8">
-              <button className="flex items-center gap-2 px-6 py-3 border border-secondary-200 
-                               rounded-full font-body text-secondary-600 hover:border-primary-400 
-                               hover:text-primary-500 transition-all">
-                <Heart className="w-5 h-5" />
-                Add to Wishlist
+              <button 
+                onClick={() => toggleItem(book)}
+                className={`flex items-center gap-2 px-6 py-3 border rounded-full font-body transition-all ${
+                  inWishlist 
+                    ? 'border-red-400 bg-red-50 text-red-500' 
+                    : 'border-secondary-200 text-secondary-600 hover:border-primary-400 hover:text-primary-500'
+                }`}
+              >
+                <Heart className={`w-5 h-5 ${inWishlist ? 'fill-current' : ''}`} />
+                {inWishlist ? 'In Wishlist' : 'Add to Wishlist'}
               </button>
               <button className="flex items-center gap-2 px-6 py-3 border border-secondary-200 
                                rounded-full font-body text-secondary-600 hover:border-primary-400 
@@ -269,7 +271,7 @@ export default function BookPage({ params }: BookPageProps) {
                 <div>
                   <p className="font-body font-semibold text-charcoal">Free Delivery</p>
                   <p className="font-body text-sm text-secondary-500">
-                    On orders over ₹500. Estimated delivery: 3-5 business days
+                    {regionVariant.shippingInfo}
                   </p>
                 </div>
               </div>
