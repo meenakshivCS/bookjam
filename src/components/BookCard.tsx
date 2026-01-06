@@ -7,6 +7,7 @@ import { Star, ShoppingBag, Heart } from 'lucide-react';
 import { Book, Author } from '@/lib/types';
 import { useCartStore } from '@/lib/cart-store';
 import { useWishlistStore } from '@/lib/wishlist-store';
+import { useCurrencyStore } from '@/lib/currency-store';
 
 interface BookCardProps {
   book: Book;
@@ -17,6 +18,7 @@ interface BookCardProps {
 export default function BookCard({ book, variant = 'default', index = 0 }: BookCardProps) {
   const { addItem, openCart } = useCartStore();
   const { toggleItem, isInWishlist } = useWishlistStore();
+  const { formatPrice } = useCurrencyStore();
 
   const inWishlist = isInWishlist(book.uid);
   const author = Array.isArray(book.author) ? book.author[0] : book.author;
@@ -33,14 +35,6 @@ export default function BookCard({ book, variant = 'default', index = 0 }: BookC
     e.preventDefault();
     e.stopPropagation();
     toggleItem(book);
-  };
-
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('en-IN', {
-      style: 'currency',
-      currency: 'INR',
-      minimumFractionDigits: 0,
-    }).format(price);
   };
 
   if (variant === 'compact') {

@@ -14,7 +14,10 @@ import {
   ChevronDown,
 } from 'lucide-react';
 import { useCartStore } from '@/lib/cart-store';
+import { useWishlistStore } from '@/lib/wishlist-store';
 import { mockCategories } from '@/lib/mock-data';
+import CurrencySelector from './CurrencySelector';
+import RegionBanner from './RegionBanner';
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -23,7 +26,9 @@ export default function Header() {
   const [showCategories, setShowCategories] = useState(false);
   
   const { getTotalItems, toggleCart } = useCartStore();
+  const { getItemCount: getWishlistCount } = useWishlistStore();
   const cartCount = getTotalItems();
+  const wishlistCount = getWishlistCount();
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,15 +39,8 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-50 bg-cream/95 backdrop-blur-md border-b border-primary-100">
-      {/* Top Bar */}
-      <div className="bg-gradient-to-r from-primary-600 to-primary-500 text-white py-2">
-        <div className="container mx-auto px-4 text-center text-sm font-body">
-          <span className="inline-flex items-center gap-2">
-            🎉 <span className="font-medium">Flat 15% OFF</span> on all books + 
-            <span className="font-medium">Free Shipping</span> on orders over ₹500!
-          </span>
-        </div>
-      </div>
+      {/* Region-specific Banner */}
+      <RegionBanner />
 
       {/* Main Header */}
       <div className="container mx-auto px-4">
@@ -79,12 +77,20 @@ export default function Header() {
           </div>
 
           {/* Desktop Actions */}
-          <div className="hidden md:flex items-center gap-4">
+          <div className="hidden md:flex items-center gap-2">
+            {/* Currency Selector */}
+            <CurrencySelector />
+            
             <Link
               href="/wishlist"
-              className="p-2 text-secondary-600 hover:text-primary-500 hover:bg-primary-50 rounded-full transition-all"
+              className="relative p-2 text-secondary-600 hover:text-primary-500 hover:bg-primary-50 rounded-full transition-all"
             >
               <Heart className="w-6 h-6" />
+              {wishlistCount > 0 && (
+                <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-xs font-bold rounded-full flex items-center justify-center">
+                  {wishlistCount}
+                </span>
+              )}
             </Link>
             <Link
               href="/account"
@@ -227,6 +233,14 @@ export default function Header() {
             className="md:hidden overflow-hidden border-t border-primary-100 bg-white"
           >
             <nav className="p-4 space-y-2">
+              {/* Mobile Currency Selector */}
+              <div className="pb-4 border-b border-secondary-100">
+                <p className="px-4 pb-2 text-sm text-secondary-500 font-body">Select Currency</p>
+                <div className="px-4">
+                  <CurrencySelector />
+                </div>
+              </div>
+              
               <Link
                 href="/bestsellers"
                 className="block px-4 py-3 rounded-lg hover:bg-primary-50 font-body font-medium text-charcoal"
@@ -272,6 +286,29 @@ export default function Header() {
                   </Link>
                 ))}
               </div>
+              <div className="pt-4 border-t border-secondary-100">
+                <Link
+                  href="/wishlist"
+                  className="flex items-center gap-3 px-4 py-3 hover:bg-primary-50 rounded-lg"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  <Heart className="w-5 h-5 text-red-500" />
+                  <span className="font-body text-charcoal">Wishlist</span>
+                  {wishlistCount > 0 && (
+                    <span className="ml-auto bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">
+                      {wishlistCount}
+                    </span>
+                  )}
+                </Link>
+                <Link
+                  href="/account"
+                  className="flex items-center gap-3 px-4 py-3 hover:bg-primary-50 rounded-lg"
+                  onClick={() => setIsMenuOpen(false)}
+                >
+                  <User className="w-5 h-5 text-secondary-600" />
+                  <span className="font-body text-charcoal">Account</span>
+                </Link>
+              </div>
             </nav>
           </motion.div>
         )}
@@ -279,4 +316,3 @@ export default function Header() {
     </header>
   );
 }
-

@@ -5,15 +5,20 @@ import { ShoppingCart, Trash2, Plus, Minus, ArrowRight, Tag } from 'lucide-react
 import Image from 'next/image';
 import Link from 'next/link';
 import { useCartStore } from '@/lib/cart-store';
+import { useCurrencyStore } from '@/lib/currency-store';
 import { Author } from '@/lib/types';
 
 export default function CartPage() {
   const { items, removeItem, updateQuantity, getTotalPrice, getTotalItems } = useCartStore();
+  const { formatPrice, regionVariant, currency } = useCurrencyStore();
 
-  const subtotal = getTotalPrice();
+  const subtotalINR = getTotalPrice();
   const itemCount = getTotalItems();
-  const shipping = subtotal > 499 ? 0 : 49;
-  const total = subtotal + shipping;
+  
+  // Get free shipping threshold in INR (convert back from region's currency)
+  const thresholdInINR = regionVariant.freeShippingThreshold / currency.exchangeRate;
+  const shipping = subtotalINR >= thresholdInINR ? 0 : Math.round(49 * currency.exchangeRate * 100) / 100;
+  const shippingINR = subtotalINR >= thresholdInINR ? 0 : 49;
 
   if (items.length === 0) {
     return (
@@ -94,10 +99,10 @@ export default function CartPage() {
                       <p className="font-body text-secondary-500 text-sm mb-2">{authorName}</p>
                       
                       <div className="flex items-center gap-2 mb-4">
-                        <span className="font-display text-xl font-bold text-primary-500">₹{book.price}</span>
+                        <span className="font-display text-xl font-bold text-primary-500">{formatPrice(book.price)}</span>
                         {book.original_price && book.original_price > book.price && (
                           <span className="font-body text-sm text-secondary-400 line-through">
-                            ₹{book.original_price}
+                            {formatPrice(book.original_price)}
                           </span>
                         )}
                       </div>
@@ -136,7 +141,7 @@ export default function CartPage() {
                     {/* Item Total */}
                     <div className="text-right">
                       <span className="font-display text-lg font-bold text-charcoal">
-                        ₹{book.price * quantity}
+                        {formatPrice(book.price * quantity)}
                       </span>
                     </div>
                   </div>
@@ -178,27 +183,27 @@ export default function CartPage() {
               <div className="space-y-3 mb-6">
                 <div className="flex justify-between font-body text-secondary-600">
                   <span>Subtotal ({itemCount} items)</span>
-                  <span>₹{subtotal}</span>
+                  <span>{formatPrice(subtotalINR)}</span>
                 </div>
                 <div className="flex justify-between font-body text-secondary-600">
                   <span>Shipping</span>
-                  <span className={shipping === 0 ? 'text-green-500' : ''}>
-                    {shipping === 0 ? 'FREE' : `₹${shipping}`}
+                  <span className={shippingINR === 0 ? 'text-green-500' : ''}>
+                    {shippingINR === 0 ? 'FREE' : formatPrice(shippingINR)}
                   </span>
                 </div>
-                {shipping === 0 && (
+                {shippingINR === 0 && (
                   <p className="text-green-600 text-sm font-body">
                     ✓ You qualify for free shipping!
                   </p>
                 )}
-                {shipping > 0 && (
+                {shippingINR > 0 && (
                   <p className="text-secondary-500 text-sm font-body">
-                    Add ₹{499 - subtotal} more for free shipping
+                    Add {formatPrice(thresholdInINR - subtotalINR)} more for free shipping
                   </p>
                 )}
                 <div className="border-t border-secondary-200 pt-3 flex justify-between">
                   <span className="font-display font-bold text-charcoal">Total</span>
-                  <span className="font-display text-xl font-bold text-primary-500">₹{total}</span>
+                  <span className="font-display text-xl font-bold text-primary-500">{formatPrice(subtotalINR + shippingINR)}</span>
                 </div>
               </div>
 

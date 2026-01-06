@@ -6,11 +6,13 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useWishlistStore } from '@/lib/wishlist-store';
 import { useCartStore } from '@/lib/cart-store';
+import { useCurrencyStore } from '@/lib/currency-store';
 import { Author } from '@/lib/types';
 
 export default function WishlistPage() {
   const { items, removeItem, clearWishlist } = useWishlistStore();
   const { addItem, openCart } = useCartStore();
+  const { formatPrice } = useCurrencyStore();
 
   const handleAddToCart = (item: typeof items[0]) => {
     addItem(item);
@@ -24,14 +26,6 @@ export default function WishlistPage() {
     });
     clearWishlist();
     openCart();
-  };
-
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('en-IN', {
-      style: 'currency',
-      currency: 'INR',
-      minimumFractionDigits: 0,
-    }).format(price);
   };
 
   if (items.length === 0) {
