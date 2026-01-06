@@ -6,10 +6,12 @@ import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Plus, Minus, Trash2, ShoppingBag, ArrowRight } from 'lucide-react';
 import { useCartStore } from '@/lib/cart-store';
+import { useCurrencyStore } from '@/lib/currency-store';
 import { Author } from '@/lib/types';
 
 export default function CartDrawer() {
   const { items, isOpen, closeCart, updateQuantity, removeItem, getTotalPrice } = useCartStore();
+  const { formatPrice, regionVariant, currency } = useCurrencyStore();
 
   // Prevent body scroll when cart is open
   useEffect(() => {
@@ -23,18 +25,12 @@ export default function CartDrawer() {
     };
   }, [isOpen]);
 
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat('en-IN', {
-      style: 'currency',
-      currency: 'INR',
-      minimumFractionDigits: 0,
-    }).format(price);
-  };
-
   const totalPrice = getTotalPrice();
-  const shippingThreshold = 500;
-  const freeShipping = totalPrice >= shippingThreshold;
-  const remainingForFreeShipping = shippingThreshold - totalPrice;
+  // Calculate threshold based on region (convert back from display currency to INR)
+  const thresholdInINR = regionVariant.freeShippingThreshold / currency.exchangeRate;
+  const freeShipping = totalPrice >= thresholdInINR;
+  const remainingForFreeShipping = thresholdInINR - totalPrice;
+  const shippingFee = freeShipping ? 0 : 50;
 
   return (
     <AnimatePresence>
@@ -89,7 +85,7 @@ export default function CartDrawer() {
                     <div className="mt-2 h-2 bg-primary-100 rounded-full overflow-hidden">
                       <motion.div
                         initial={{ width: 0 }}
-                        animate={{ width: `${(totalPrice / shippingThreshold) * 100}%` }}
+                        animate={{ width: `${Math.min((totalPrice / thresholdInINR) * 100, 100)}%` }}
                         className="h-full bg-gradient-to-r from-primary-400 to-primary-500 rounded-full"
                       />
                     </div>
@@ -214,13 +210,13 @@ export default function CartDrawer() {
                 <div className="flex items-center justify-between mb-4">
                   <span className="font-body text-secondary-600">Shipping</span>
                   <span className="font-body font-medium text-green-600">
-                    {freeShipping ? 'FREE' : formatPrice(50)}
+                    {freeShipping ? 'FREE' : formatPrice(shippingFee)}
                   </span>
                 </div>
                 <div className="flex items-center justify-between py-3 border-t border-secondary-100">
                   <span className="font-display text-lg font-bold text-charcoal">Total</span>
                   <span className="font-display text-xl font-bold text-primary-600">
-                    {formatPrice(totalPrice + (freeShipping ? 0 : 50))}
+                    {formatPrice(totalPrice + shippingFee)}
                   </span>
                 </div>
 
@@ -252,5 +248,3 @@ export default function CartDrawer() {
     </AnimatePresence>
   );
 }
-
-
